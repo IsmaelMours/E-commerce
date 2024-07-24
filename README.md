@@ -28,7 +28,7 @@
   - Click File > Import...
   - Select Maven > Existing Maven Projects and click Next
   - Browse to the project directory and click Finish
-3. Update the values in application.properties with your MySQL database connection details.
+3. Update the values in application.properties with your h2 database connection details.
 4. Run the app: Right-click the project in the Package Explorer and click Run As > Spring Boot App.
 
 

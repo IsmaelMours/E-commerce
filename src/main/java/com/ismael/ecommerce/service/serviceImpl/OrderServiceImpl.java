@@ -6,10 +6,8 @@ import com.ismael.ecommerce.dto.ProductDTO;
 import com.ismael.ecommerce.dto.UserDTO;
 import com.ismael.ecommerce.model.Order;
 import com.ismael.ecommerce.model.OrderItem;
-import com.ismael.ecommerce.repository.CartRepository;
-import com.ismael.ecommerce.repository.OrderItemRepository;
-import com.ismael.ecommerce.repository.OrderRepository;
-import com.ismael.ecommerce.repository.UserRepository;
+import com.ismael.ecommerce.model.Product;
+import com.ismael.ecommerce.repository.*;
 import com.ismael.ecommerce.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +25,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -66,6 +67,56 @@ public class OrderServiceImpl implements OrderService {
 
         return convertToOrderDTO(order);
     }
+
+    @Override
+    public void cancelOrder(Long orderId) {
+        var order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if ("Shipped".equals(order.getStatus())) {
+            throw new RuntimeException("Order already shipped, cannot cancel");
+        }
+
+        // Revert stock changes
+        for (OrderItem item : order.getItems()) {
+            Product product = item.getProduct();
+            product.setStock(product.getStock() + item.getQuantity());
+            productRepository.save(product);
+        }
+
+        orderRepository.delete(order);
+    }
+
+    @Override
+    public OrderDTO updateOrderStatus(Long orderId, String status) {
+        var order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        order.setStatus(status);
+        orderRepository.save(order);
+
+        return convertToOrderDTO(order);
+    }
+
+    @Override
+    public List<OrderDTO> getOrderHistory(Long userId) {
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Order> orders = orderRepository.findByUser(user);
+        return orders.stream().map(this::convertToOrderDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public OrderDTO getOrderDetails(Long orderId) {
+        var order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        return convertToOrderDTO(order);
+    }
+
+
+
 
     private OrderDTO convertToOrderDTO(Order order) {
         List<OrderItemDTO> orderItemDTOs = order.getItems().stream()
