@@ -21,14 +21,9 @@ public class CartController {
             @PathVariable Long productId,
             @PathVariable int quantity) {
 
-        try {
             CartDTO cartDTO = cartService.addProductToCart(userId, productId, quantity);
             return ResponseEntity.ok(cartDTO);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+
     }
 
 
@@ -37,14 +32,10 @@ public class CartController {
             @PathVariable Long userId,
             @PathVariable Long productId) {
 
-        try {
+
             CartDTO cartDTO = cartService.removeProductFromCart(userId, productId);
             return ResponseEntity.ok(cartDTO);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+
     }
 }
 
