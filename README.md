@@ -33,5 +33,8 @@
 
 
 # API Controllers
+![](docs/api.png)
+## Get swagger link below to access api
+http://localhost:8080/swagger-ui/index.html
 
 # Thank You
